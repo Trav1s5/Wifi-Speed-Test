@@ -133,6 +133,18 @@ class SpeedTestApp(ctk.CTk):
         # --- Progress Bar (initially hidden) ---
         self.progress_bar = ctk.CTkProgressBar(self, mode='indeterminate')
 
+        # --- Simple Click Game Frame (initially hidden) ---
+        self.game_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.game_frame.grid(row=1, column=0, padx=20, pady=10, sticky="ew")
+        self.game_frame.grid_columnconfigure(0, weight=1)
+        self.game_frame.grid_remove()  # Hide initially
+
+        self.click_count = 0
+        self.click_label = ctk.CTkLabel(self.game_frame, text="Clicks: 0", font=("Arial", 16))
+        self.click_label.grid(row=0, column=0, pady=10)
+        self.click_button = ctk.CTkButton(self.game_frame, text="Click Me!", command=self.increment_click)
+        self.click_button.grid(row=1, column=0, pady=10)
+
         # --- Start Button ---
         self.start_button = ctk.CTkButton(
             self,
@@ -143,6 +155,11 @@ class SpeedTestApp(ctk.CTk):
             hover_color="#00AADD"
         )
         self.start_button.grid(row=2, column=0, padx=20, pady=20, ipady=10, sticky="ew")
+
+    # --- Functions ---
+    def increment_click(self):
+        self.click_count += 1
+        self.click_label.configure(text=f"Clicks: {self.click_count}")
 
     def change_appearance_mode(self, new_mode):
         ctk.set_appearance_mode(new_mode)
@@ -179,15 +196,15 @@ class SpeedTestApp(ctk.CTk):
 
     def start_test_thread(self):
         self.start_button.configure(text="Running Test...", state="disabled")
-        self.history_button.configure(state="disabled")  # Disable history button too
-
+        self.history_button.configure(state="disabled")
         self.ping_label.configure(text="-- ms")
         self.download_label.configure(text="-- Mbps")
         self.upload_label.configure(text="-- Mbps")
-
         self.progress_bar.grid(row=1, column=0, padx=20, pady=10, sticky="ew")
         self.progress_bar.start()
-
+        self.game_frame.grid()  # Show game
+        self.click_count = 0
+        self.click_label.configure(text="Clicks: 0")
         test_thread = threading.Thread(target=self.run_speed_test)
         test_thread.start()
 
@@ -217,9 +234,9 @@ class SpeedTestApp(ctk.CTk):
         finally:
             self.progress_bar.stop()
             self.progress_bar.grid_forget()
-
+            self.game_frame.grid_remove()  # Hide game
             self.start_button.configure(text="Run Speed Test", state="normal")
-            self.history_button.configure(state="normal")  # Re-enable history button
+            self.history_button.configure(state="normal")
 
 
 # --- Run the Application ---
